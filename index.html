@@ -1,50 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Player</title>
+    <title>پخش ویدیو</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            height: 100vh; /* کل ارتفاع صفحه */
-            width: 100vw; /* کل عرض صفحه */
-            overflow: hidden; /* جلوگیری از اسکرول */
-            background: #000; /* پس‌زمینه مشکی */
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
         }
         video {
-            width: 100%; /* عرض کامل */
-            height: 100%; /* ارتفاع کامل */
-            object-fit: contain; /* حفظ نسبت تصویر */
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain; /* یا cover برای پوشش کل صفحه */
+        }
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
-    <video controls>
-        <source src="" id="videoSource">
-        Your browser does not support the video tag.
+
+    <div class="controls">
+        <input type="text" id="videoUrl" placeholder="لینک ویدیو را وارد کنید">
+        <button onclick="loadVideo()">پخش</button>
+    </div>
+
+    <video id="player" controls>
+        مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
     </video>
 
     <script>
-        // دریافت لینک از پارامتر video
-        const urlParams = new URLSearchParams(window.location.search);
-        const videoUrl = urlParams.get('video');
-        if (videoUrl) {
-            const videoSource = document.getElementById('videoSource');
-            // تشخیص نوع فایل بر اساس پسوند
-            if (videoUrl.endsWith('.mkv')) {
-                videoSource.type = 'video/x-matroska';
-            } else if (videoUrl.endsWith('.mp4')) {
-                videoSource.type = 'video/mp4';
-            } else {
-                videoSource.type = ''; // برای فرمت‌های ناشناخته
-            }
-            videoSource.src = videoUrl;
-            document.querySelector('video').load(); // بارگذاری مجدد ویدیو
-        } else {
-            alert('لطفاً لینک ویدیو را با پارامتر video وارد کنید!');
+        function getParameterByName(name, url = window.location.href) {
+            name = name.replace(/[]/g, "\\$&");
+            let regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
         }
+
+        function loadVideo() {
+            let videoUrl = document.getElementById("videoUrl").value;
+            if (videoUrl) {
+                document.getElementById("player").src = videoUrl;
+                window.history.pushState(null, "", "?video=" + encodeURIComponent(videoUrl));
+            }
+        }
+
+        window.onload = function () {
+            let videoSrc = getParameterByName("video");
+            if (videoSrc) {
+                document.getElementById("player").src = videoSrc;
+                document.getElementById("videoUrl").value = videoSrc;
+            }
+        };
     </script>
+
 </body>
 </html>
